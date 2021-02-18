@@ -77,9 +77,11 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
 
           i++;
           loop();
+        }).catch((error)=>{
+          console.log(error);
+          i++;
+          loop();
         });
-
-        i++;
       }else{
         res.send({results:final_result});
       }
