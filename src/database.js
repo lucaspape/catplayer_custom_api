@@ -47,6 +47,53 @@ module.exports = function(config){
       tags: [
         'id'
       ]
+    },
+    {
+      measurement: 'session',
+      fields: {
+
+      },
+      tags: [
+        'id'
+      ]
+    },
+    {
+      measurement: 'user',
+      fields: {
+        password: Influx.FieldType.STRING
+      },
+      tags: [
+        'id',
+        'username'
+      ]
+    },
+    {
+      measurement: 'release_tracks',
+      fields: {
+        songId: Influx.FieldType.STRING
+      },
+      tags: [
+        'releaseId',
+      ]
+    },
+    {
+      measurement: 'playlist',
+      fields: {
+        name: Influx.FieldType.STRING
+      },
+      tags: [
+        'id',
+        'userId'
+      ]
+    },
+    {
+      measurement: 'playlist_tracks',
+      fields: {
+        songId: Influx.FieldType.STRING
+      },
+      tags: [
+        'playlistId'
+      ]
     }
   ]});
 }
