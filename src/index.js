@@ -61,7 +61,7 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
         res.send({results:final_result});
       });
     }).catch((error)=>{
-      res.status(500).send(error);
+      res.status(500).send(error.stack);
     });
   });
 });
@@ -73,7 +73,7 @@ app.get(API_PREFIX + '/releases', (req,res) => {
     influxDB.query('select * from release ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
       res.send({results:result});
     }).catch((error)=>{
-      res.status(500).send(error);
+      res.status(500).send(error.stack);
     });
   });
 });
@@ -109,7 +109,7 @@ app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
       loop();
     });
   }).catch((error)=>{
-    res.status(500).send(error);
+    res.status(500).send(error.stack);
   });
 });
 
@@ -305,7 +305,7 @@ app.get(API_PREFIX + '/catalog/search', (req, res) => {
         res.send({results:final_result});
       });
     }).catch((error)=>{
-      res.status(500).send(error);
+      res.status(500).send(error.stack);
     });
   });
 });
