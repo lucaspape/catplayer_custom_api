@@ -139,7 +139,7 @@ function convert_to_flac(filename, releaseId, songid, callback){
 }
 
 function convert_to_mp3(filename, releaseId, songid, callback){
-  exec('ffmpeg -i ' + filename + ' songs/' + releaseId + '/mp3/' + songid + '.mp3', (error, stdout, stderr)=>{
+  exec('ffmpeg -i ' + filename + ' -ab 320k songs/' + releaseId + '/mp3/' + songid + '.mp3', (error, stdout, stderr)=>{
     callback();
   });
 }
