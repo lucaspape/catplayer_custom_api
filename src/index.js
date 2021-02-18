@@ -41,6 +41,8 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
         influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((release_result)=>{
           if(release_result[0]){
             track.release = release_result[0];
+            track.artists.split(',');
+            track.tags.split(',');
 
             final_result.push(track);
           }
