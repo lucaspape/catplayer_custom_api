@@ -7,12 +7,29 @@ const database = require('./database.js');
 
 var config = JSON.parse(fs.readFileSync('config.json'));
 
-var song_filename = 'elevate.flac';
+var songs_dir = process.argv[2];
 
-add_song(song_filename);
+fs.readdir(songs_dir, (err, files) => {
+  var i = 0;
 
-async function add_song(filename){
+  var add_loop = async function(){
+    if(i<files.length){
+      add_song(songs_dir + '/' + files[i], ()=>{
+        i++;
+        add_loop();
+      });
+    }
+  }
+
+  add_loop();
+});
+
+async function add_song(filename, callback){
+  console.log('Adding song file: ' + filename);
+
   const metadata = await mm.parseFile(filename);
+
+  filename = '"' + filename + '"';
 
   var influxDB = database(config);
 
@@ -42,6 +59,8 @@ async function add_song(filename){
 
   save_cover_image(releaseId, metadata.common.picture[0].data, ()=>{
     convert_audio(filename, releaseId, songId, ()=>{
+      console.log('Converted audio!');
+
       influxDB.writePoints([
         {
           measurement: 'catalog',
@@ -89,6 +108,8 @@ async function add_song(filename){
           }
         }
       ]);
+
+      callback();
     });
   });
 }
