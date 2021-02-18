@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/lucaspape/catplayer_custom_api/issues"
   },
-  "homepage": "https://github.com/lucaspape/catplayer_custom_api#readme"
+  "homepage": "https://github.com/lucaspape/catplayer_custom_api#readme",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "influx": "^5.7.0",
+    "music-metadata": "^7.8.0",
+    "stream": "0.0.2",
+    "uuid": "^8.3.2"
+  }
 }
