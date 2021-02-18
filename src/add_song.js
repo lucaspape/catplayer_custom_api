@@ -40,54 +40,56 @@ async function add_song(filename){
 
   var bpm = 0;
 
-  convert_audio(filename, releaseId, songId, ()=>{
-    influxDB.writePoints([
-      {
-        measurement: 'catalog',
-        tags: {
-          id: songId
+  save_cover_image(releaseId, metadata.common.picture[0].data, ()=>{
+    convert_audio(filename, releaseId, songId, ()=>{
+      influxDB.writePoints([
+        {
+          measurement: 'catalog',
+          tags: {
+            id: songId
+          },
+          fields: {
+            artistIds: '',
+            artistsTitle: artistsTitle,
+            bpm: bpm,
+            creatorFriendly: true,
+            debutDate: releaseDate,
+            debutTime: releaseTime,
+            duration: duration,
+            explicit: false,
+            genrePrimary: genrePrimary,
+            genreSecondary: genreSecondary,
+            isrc: isrc,
+            playlistSort: 0,
+            releaseId: releaseId,
+            tags: tags,
+            title: title,
+            version: version,
+            inEarlyAccess: false,
+            downloadable: true,
+            streamable: true
+          }
         },
-        fields: {
-          artistIds: '',
-          artistsTitle: artistsTitle,
-          bpm: bpm,
-          creatorFriendly: true,
-          debutDate: releaseDate,
-          debutTime: releaseTime,
-          duration: duration,
-          explicit: false,
-          genrePrimary: genrePrimary,
-          genreSecondary: genreSecondary,
-          isrc: isrc,
-          playlistSort: 0,
-          releaseId: releaseId,
-          tags: tags,
-          title: title,
-          version: version,
-          inEarlyAccess: false,
-          downloadable: true,
-          streamable: true
+        {
+          measurement: 'release',
+          tags: {
+            id: releaseId
+          },
+          fields: {
+            catalogId: catalogId,
+            artistsTitle:artistsTitle,
+            genrePrimary:genrePrimary,
+            genreSecondary:genreSecondary,
+            links:links,
+            releaseDate:releaseDate,
+            releaseTime:releaseTime,
+            title:title,
+            type:type,
+            version:version
+          }
         }
-      },
-      {
-        measurement: 'release',
-        tags: {
-          id: releaseId
-        },
-        fields: {
-          catalogId: catalogId,
-          artistsTitle:artistsTitle,
-          genrePrimary:genrePrimary,
-          genreSecondary:genreSecondary,
-          links:links,
-          releaseDate:releaseDate,
-          releaseTime:releaseTime,
-          title:title,
-          type:type,
-          version:version
-        }
-      }
-    ]);
+      ]);
+    });
   });
 }
 
@@ -121,6 +123,26 @@ function convert_to_mp3(filename, releaseId, songid, callback){
 
 function convert_to_wav(filename, releaseId, songid, callback){
   exec('ffmpeg -i ' + filename + ' songs/' + releaseId + '/wav/' + songid + '.wav', (error, stdout, stderr)=>{
+    callback();
+  });
+}
+
+function save_cover_image(releaseId, coverImage, callback){
+  if(coverImage){
+    create_cover_image_dirs(releaseId, ()=>{
+      var fs_stream = fs.createWriteStream('covers/' + releaseId + '.jpg');
+
+      fs_stream.write(coverImage);
+      fs_stream.end();
+      callback();
+    });
+  }else{
+    callback();
+  }
+}
+
+function create_cover_image_dirs(releaseId, callback){
+  exec('mkdir -p covers/' + releaseId, (error, stdout, stderr)=>{
     callback();
   });
 }

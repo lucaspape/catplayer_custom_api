@@ -1,5 +1,6 @@
 config.json
 songs/
+covers/
 *.flac
 # Logs
 logs
