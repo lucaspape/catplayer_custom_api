@@ -238,7 +238,9 @@ app.get(API_PREFIX+ '/release/:releaseId/track-stream/:songId', (req, res) =>{
 
       let readable = createReadStream(song_file);
       pipeline(readable, res, err => {
-        console.log(err);
+        if(err){
+          console.log(err);
+        }
       });
     }
   });
@@ -255,8 +257,6 @@ app.get(API_PREFIX + '/release/:releaseId/track-download/:songId', (req, res) =>
   }
 
   const song_file = 'songs/' + releaseId + '/' + format + '/' + songId + '.' + format;
-
-  console.log(song_file);
 
   fs.stat(song_file, (err, stat) => {
     if(err){
