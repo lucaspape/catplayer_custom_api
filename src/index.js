@@ -96,13 +96,15 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
 });
 
 app.get(API_PREFIX + '/releases', (req,res) => {
-  var influxDB = database(config);
+  fixSkipAndLimit(req.query, (skip, limit)=>{
+    var influxDB = database(config);
 
-  influxDB.query('select * from release').then( (result)=>{
-    res.send({results:result});
-  }).catch((error)=>{
-    res.status(500).send(error);
-  });
+    influxDB.query('select * from release ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
+      res.send({results:result});
+    }).catch((error)=>{
+      res.status(500).send(error);
+    });
+  }
 });
 
 app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
