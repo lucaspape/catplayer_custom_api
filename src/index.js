@@ -20,7 +20,7 @@ app.get(API_PREFIX + '/', (req,res) => {
 
 app.get(PREFIX + '/features', async (req, res) => {
   try {
-    res.send(JSON.parse(fs.readFileSync('static/api_features.json')));
+    res.send(JSON.parse(fs.readFileSync('api_features.json')));
   } catch (e) {
     res.status(500).send(e);
   }
