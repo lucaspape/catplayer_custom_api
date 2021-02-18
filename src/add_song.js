@@ -107,9 +107,11 @@ async function add_song(filename, callback){
             version:version
           }
         }
-      ]);
-
-      callback();
+      ]).then(()=>{
+        callback();
+      }).catch(error => {
+        console.log(error.stack);
+      });
     });
   });
 }
