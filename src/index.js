@@ -7,14 +7,14 @@ const path = require('path')
 
 const database = require('./database.js');
 
-const PORT = 8180;
-const PREFIX = '/monstercat-custom';
+var config = JSON.parse(fs.readFileSync('config.json'));
+
+const PORT = config.port;
+const PREFIX = config.prefix;
 const API_PREFIX = PREFIX + '/v1';
 const API_NEXT_PREFIX = PREFIX + '/v2';
 
 const app = express();
-
-var config = JSON.parse(fs.readFileSync('config.json'));
 
 app.get(PREFIX + '/stats', (req, res) => {
   res.status(500).send('NOT IMPLEMENTED');
