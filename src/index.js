@@ -42,7 +42,7 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
           if(release_result[0]){
             track.release = release_result[0];
             track.artists = [];
-            track.tags.split(',');
+            track.tags = [];
 
             final_result.push(track);
           }
