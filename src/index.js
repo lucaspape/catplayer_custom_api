@@ -293,9 +293,9 @@ app.get(API_PREFIX + '/artists', (req, res) => {
 });
 
 app.get(API_PREFIX + '/catalog/search', (req, res) => {
-  var searchString = utils.fixSearchString(req.query.term);
+  var searchString = fixSearchString(req.query.term);
 
-  utils.fixSkipAndLimit(req.query, (skip, limit) => {
+  fixSkipAndLimit(req.query, (skip, limit) => {
     var influxDB = database(config);
 
     const terms = searchString.split(' ');
