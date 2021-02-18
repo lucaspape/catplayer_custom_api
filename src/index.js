@@ -104,7 +104,7 @@ app.get(API_PREFIX + '/releases', (req,res) => {
     }).catch((error)=>{
       res.status(500).send(error);
     });
-  }
+  });
 });
 
 app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
