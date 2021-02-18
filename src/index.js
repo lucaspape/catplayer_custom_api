@@ -57,38 +57,9 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
     var influxDB = database(config);
 
     influxDB.query('select * from catalog ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
-      var final_result = [];
-
-      var i = 0;
-
-      var loop = function(){
-        if(i<result.length){
-          const track = result[i];
-
-          influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((release_result)=>{
-            if(release_result[0]){
-              track.release = release_result[0];
-              track.artists = [];
-              track.tags = [];
-
-              final_result.push(track);
-            }else{
-              console.log('No release found!');
-            }
-
-            i++;
-            loop();
-          }).catch((error)=>{
-            console.log(error);
-            i++;
-            loop();
-          });
-        }else{
-          res.send({results:final_result});
-        }
-      }
-
-      loop();
+      add_release_objects_to_tracks(influxDB, result, (final_result)=>{
+        res.send({results:final_result});
+      });
     }).catch((error)=>{
       res.status(500).send(error);
     });
@@ -130,7 +101,10 @@ app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
             loop();
           });
         }else{
-          res.send(result_object);
+          add_release_objects_to_tracks(influxDB, result_object.tracks, (result)=>{
+            result_object.tracks = result;
+            res.send(result_object);
+          });
         }
       }
 
@@ -359,4 +333,38 @@ function fixSkipAndLimit(reqQuery, callback) {
   }
 
   callback(skip, limit);
+}
+
+function add_release_objects_to_tracks(influxDB, track_array, callback){
+  var final_track_array = [];
+  var i = 0;
+
+  var loop = function(){
+    if(i<track_array.length){
+      const track = track_array[i];
+
+      influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((release_result)=>{
+        if(release_result[0]){
+          track.release = release_result[0];
+          track.artists = [];
+          track.tags = [];
+
+          final_track_array.push(track);
+        }else{
+          console.log('No release found!');
+        }
+
+        i++;
+        loop();
+      }).catch((error)=>{
+        console.log(error);
+        i++;
+        loop();
+      });
+    }else{
+      callback(final_track_array);
+    }
+  }
+
+  loop();
 }
