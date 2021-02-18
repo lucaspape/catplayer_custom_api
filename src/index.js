@@ -53,7 +53,7 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
 
         i++;
       }else{
-        res.send(final_result);
+        res.send({results:final_result});
       }
     }
 
@@ -67,7 +67,7 @@ app.get(API_PREFIX + '/releases', (req,res) => {
   var influxDB = database(config);
 
   influxDB.query('select * from release').then( (result)=>{
-    res.send(result);
+    res.send({results:result});
   }).catch((error)=>{
     res.status(500).send(error);
   });
