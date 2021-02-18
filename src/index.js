@@ -16,11 +16,7 @@ const app = express();
 
 var config = JSON.parse(fs.readFileSync('config.json'));
 
-app.get(API_PREFIX + '/', (req,res) => {
-  res.send('Hello world!');
-});
-
-app.get(API_PREFIX + '/stats', (req, res) => {
+app.get(PREFIX + '/stats', (req, res) => {
   res.status(500).send('NOT IMPLEMENTED');
 
   //TODO IMPLEMENT
@@ -32,6 +28,10 @@ app.get(PREFIX + '/features', async (req, res) => {
   } catch (e) {
     res.status(500).send(e);
   }
+});
+
+app.get(API_PREFIX + '/', (req,res) => {
+  res.send('Hello world!');
 });
 
 app.get(API_NEXT_PREFIX + '/session', (req, res) => {
@@ -278,6 +278,30 @@ app.get(API_PREFIX + '/release/:releaseId/track-download/:songId', (req, res) =>
       }
     });
   });
+});
+
+app.get(API_PREFIX + '/artists', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_PREFIX + '/catalog/search', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_PREFIX + '/releases/search', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_PREFIX + '/artists/search', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
 });
 
 app.listen(PORT, () => {
