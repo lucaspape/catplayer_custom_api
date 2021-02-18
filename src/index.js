@@ -53,43 +53,45 @@ app.post(API_NEXT_PREFIX + '/signin', (req, res) => {
 });
 
 app.get(API_PREFIX + '/catalog', (req,res) => {
-  var influxDB = database(config);
+  fixSkipAndLimit(req.query, (skip, limit)=>{
+    var influxDB = database(config);
 
-  influxDB.query('select * from catalog').then( (result)=>{
-    var final_result = [];
+    influxDB.query('select * from catalog ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
+      var final_result = [];
 
-    var i = 0;
+      var i = 0;
 
-    var loop = function(){
-      if(i<result.length){
-        const track = result[i];
+      var loop = function(){
+        if(i<result.length){
+          const track = result[i];
 
-        influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((release_result)=>{
-          if(release_result[0]){
-            track.release = release_result[0];
-            track.artists = [];
-            track.tags = [];
+          influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((release_result)=>{
+            if(release_result[0]){
+              track.release = release_result[0];
+              track.artists = [];
+              track.tags = [];
 
-            final_result.push(track);
-          }else{
-            console.log('No release found!');
-          }
+              final_result.push(track);
+            }else{
+              console.log('No release found!');
+            }
 
-          i++;
-          loop();
-        }).catch((error)=>{
-          console.log(error);
-          i++;
-          loop();
-        });
-      }else{
-        res.send({results:final_result});
+            i++;
+            loop();
+          }).catch((error)=>{
+            console.log(error);
+            i++;
+            loop();
+          });
+        }else{
+          res.send({results:final_result});
+        }
       }
-    }
 
-    loop();
-  }).catch((error)=>{
-    res.status(500).send(error);
+      loop();
+    }).catch((error)=>{
+      res.status(500).send(error);
+    });
   });
 });
 
@@ -311,3 +313,22 @@ app.get(API_PREFIX + '/artists/search', (req, res) => {
 app.listen(PORT, () => {
   console.log('Server started on port ' + PORT);
 });
+
+function fixSkipAndLimit(reqQuery, callback) {
+  var skip = 0;
+  var limit = 50;
+
+  if (reqQuery.skip !== undefined) {
+    skip = parseInt(reqQuery.skip);
+  }
+
+  if (reqQuery.limit !== undefined) {
+    limit = parseInt(reqQuery.limit);
+
+    if (limit > 50) {
+      limit = 50;
+    }
+  }
+
+  callback(skip, limit);
+}
