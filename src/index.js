@@ -71,6 +71,8 @@ app.get(API_PREFIX + '/catalog', (req,res) => {
             track.tags = [];
 
             final_result.push(track);
+          }else{
+            console.log('No release found!');
           }
 
           i++;
