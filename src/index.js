@@ -10,6 +10,7 @@ const database = require('./database.js');
 const PORT = 8180;
 const PREFIX = '/monstercat-custom';
 const API_PREFIX = PREFIX + '/v1';
+const API_NEXT_PREFIX = PREFIX + '/v2';
 
 const app = express();
 
@@ -19,12 +20,36 @@ app.get(API_PREFIX + '/', (req,res) => {
   res.send('Hello world!');
 });
 
+app.get(API_PREFIX + '/stats', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
 app.get(PREFIX + '/features', async (req, res) => {
   try {
     res.send(JSON.parse(fs.readFileSync('api_features.json')));
   } catch (e) {
     res.status(500).send(e);
   }
+});
+
+app.get(API_NEXT_PREFIX + '/session', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.post(API_NEXT_PREFIX + '/register', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.post(API_NEXT_PREFIX + '/signin', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
 });
 
 app.get(API_PREFIX + '/catalog', (req,res) => {
@@ -74,6 +99,74 @@ app.get(API_PREFIX + '/releases', (req,res) => {
   });
 });
 
+app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
+  const mcID = req.params.mcID;
+
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.post(API_PREFIX + '/related', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_NEXT_PREFIX + '/playlist', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_NEXT_PREFIX + '/playlists', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.post(API_NEXT_PREFIX + '/playlist', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.delete(API_NEXT_PREFIX + '/playlist/:playlistId', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.patch(API_NEXT_PREFIX + '/playlist/:playlistId', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_NEXT_PREFIX + '/playlist/:playlistId', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.get(API_NEXT_PREFIX + '/playlist/:playlistId/catalog', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.delete(API_NEXT_PREFIX + '/playlist/:playlistId/record', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
+app.patch(API_NEXT_PREFIX + '/playlist/:playlistId/record', (req, res) => {
+  res.status(500).send('NOT IMPLEMENTED');
+
+  //TODO IMPLEMENT
+});
+
 app.get(API_PREFIX + '/release/:releaseId/cover', async (req, res) => {
   const releaseId = req.params.releaseId;
   const image_width = req.query.image_width;
@@ -82,7 +175,6 @@ app.get(API_PREFIX + '/release/:releaseId/cover', async (req, res) => {
 
   res.sendFile(cover_image_file);
 });
-
 
 app.get(API_PREFIX+ '/release/:releaseId/track-stream/:songId', (req, res) =>{
   const releaseId = req.params.releaseId;
