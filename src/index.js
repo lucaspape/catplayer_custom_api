@@ -175,7 +175,7 @@ app.get(API_PREFIX + '/release/:releaseId/cover', async (req, res) => {
   const releaseId = req.params.releaseId;
   const image_width = req.query.image_width;
 
-  const cover_image_file = path.resolve('covers/' + releaseId + '.jpg');
+  const cover_image_file = path.resolve('covers/' + releaseId + '/' + releaseId + '.jpg');
 
   res.sendFile(cover_image_file);
 });

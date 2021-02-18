@@ -166,7 +166,7 @@ function convert_to_wav(filename, releaseId, songid, callback){
 function save_cover_image(releaseId, coverImage, callback){
   if(coverImage){
     create_cover_image_dirs(releaseId, ()=>{
-      var fs_stream = fs.createWriteStream('covers/' + releaseId + '.jpg');
+      var fs_stream = fs.createWriteStream('covers/' + releaseId + '/' + releaseId + '.jpg');
 
       fs_stream.write(coverImage);
       fs_stream.end();
