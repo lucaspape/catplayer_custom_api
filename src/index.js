@@ -95,7 +95,7 @@ app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
       var loop = function(){
         if(i<release_tracks_result.length){
           influxDB.query('select * from catalog where id=~ /^' +  release_tracks_result[i].songId + '/').then( (tracks_result)=>{
-            tracks_result[0].release = release_result;
+            tracks_result[0].release = release_result[0];
             result_object.tracks.push(tracks_result[0]);
 
             i++;
