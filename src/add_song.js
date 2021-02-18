@@ -96,27 +96,32 @@ async function add_song(filename, callback){
             downloadable: true,
             streamable: true
           }
-        },
-        {
-          measurement: 'release',
-          tags: {
-            id: releaseId
-          },
-          fields: {
-            catalogId: catalogId,
-            artistsTitle:artistsTitle,
-            genrePrimary:genrePrimary,
-            genreSecondary:genreSecondary,
-            links:links,
-            releaseDate:releaseDate,
-            releaseTime:releaseTime,
-            title:title,
-            type:type,
-            version:version
-          }
         }
       ]).then(()=>{
-        callback();
+        influxDB.writePoints([
+          {
+            measurement: 'release',
+            tags: {
+              id: releaseId
+            },
+            fields: {
+              catalogId: catalogId,
+              artistsTitle:artistsTitle,
+              genrePrimary:genrePrimary,
+              genreSecondary:genreSecondary,
+              links:links,
+              releaseDate:releaseDate,
+              releaseTime:releaseTime,
+              title:title,
+              type:type,
+              version:version
+            }
+          }
+        ]).then(()=>{
+          callback();
+        }).catch(error => {
+          console.log(error.stack);
+        });
       }).catch(error => {
         console.log(error.stack);
       });
