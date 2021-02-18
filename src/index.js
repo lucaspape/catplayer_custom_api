@@ -115,7 +115,7 @@ app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
   influxDB.query('select * from release where catalogId=~ /^' +  mcID + '/').then( (release_result)=>{
     var result_object = {};
 
-    result_object.release = release_result;
+    result_object.release = release_result[0];
     result_object.tracks = [];
 
     influxDB.query('select * from release_tracks where releaseId=~ /^' +  mcID + '/').then( (release_tracks_result)=>{
