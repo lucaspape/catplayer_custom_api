@@ -24,7 +24,8 @@ module.exports = function(config){
         version: Influx.FieldType.STRING,
         inEarlyAccess: Influx.FieldType.BOOLEAN,
         downloadable: Influx.FieldType.BOOLEAN,
-        streamable: Influx.FieldType.BOOLEAN
+        streamable: Influx.FieldType.BOOLEAN,
+        search: Influx.FieldType.STRING
       },
       tags: [
         'id'

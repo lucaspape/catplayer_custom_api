@@ -293,9 +293,21 @@ app.get(API_PREFIX + '/artists', (req, res) => {
 });
 
 app.get(API_PREFIX + '/catalog/search', (req, res) => {
-  res.status(500).send('NOT IMPLEMENTED');
+  var searchString = utils.fixSearchString(req.query.term);
 
-  //TODO IMPLEMENT
+  utils.fixSkipAndLimit(req.query, (skip, limit) => {
+    var influxDB = database(config);
+
+    const terms = searchString.split(' ');
+
+    influxDB.query('select * from catalog WHERE search =~ /*' + terms[0] + '*/ ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
+      add_release_objects_to_tracks(influxDB, result, (final_result)=>{
+        res.send({results:final_result});
+      });
+    }).catch((error)=>{
+      res.status(500).send(error);
+    });
+  });
 });
 
 app.get(API_PREFIX + '/releases/search', (req, res) => {
@@ -331,6 +343,20 @@ function fixSkipAndLimit(reqQuery, callback) {
   }
 
   callback(skip, limit);
+}
+
+function fixSearchString(searchString) {
+  if (searchString === undefined) {
+    return '';
+  } else {
+    searchString = searchString.replace(/[^\x20-\x7E]/g, "");
+    searchString = searchString.replace('(', '%7B');
+    searchString = searchString.replace(')', '%7D');
+    searchString = searchString.replace(' ', '%20');
+    searchString = searchString.trim();
+
+    return searchString;
+  }
 }
 
 function add_release_objects_to_tracks(influxDB, track_array, callback){

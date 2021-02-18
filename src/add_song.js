@@ -79,27 +79,7 @@ async function add_song(filename, callback){
           tags: {
             id: songId
           },
-          fields: {
-            artistIds: '',
-            artistsTitle: artistsTitle,
-            bpm: bpm,
-            creatorFriendly: true,
-            debutDate: releaseDate,
-            debutTime: releaseTime,
-            duration: duration,
-            explicit: false,
-            genrePrimary: genrePrimary,
-            genreSecondary: genreSecondary,
-            isrc: isrc,
-            playlistSort: 0,
-            releaseId: releaseId,
-            tags: tags,
-            title: title,
-            version: version,
-            inEarlyAccess: false,
-            downloadable: true,
-            streamable: true
-          }
+          fields: add_song_to_db('',artistsTitle,bpm,true,releaseDate,releaseTime,duration,false,genrePrimary,genreSecondary,isrc,0,releaseId,tags,title,version,false,true,true)
         },
         {
           measurement: 'release',
@@ -135,6 +115,33 @@ async function add_song(filename, callback){
       });
     });
   });
+}
+
+function add_song_to_db(artistIds, artistsTitle,bpm,creatorFriendly,debutDate,debutTime,duration,explicit,genrePrimary,genreSecondary,isrc,playlistSort,releaseId,tags,title,version,inEarlyAccess,downloadable,streamable){
+  var search = artistsTitle + genrePrimary + genreSecondary + tags + title + version;
+
+  return{
+    artistIds: artistIds,
+    artistsTitle: artistsTitle,
+    bpm: bpm,
+    creatorFriendly: creatorFriendly,
+    debutDate: debutDate,
+    debutTime: debutTime,
+    duration: duration,
+    explicit: explicit,
+    genrePrimary: genrePrimary,
+    genreSecondary: genreSecondary,
+    isrc: isrc,
+    playlistSort: playlistSort,
+    releaseId: releaseId,
+    tags: tags,
+    title: title,
+    version: version,
+    inEarlyAccess: inEarlyAccess,
+    downloadable: downloadable,
+    streamable: streamable,
+    search: search
+  }
 }
 
 function convert_audio(filename, releaseId, songid, callback){
