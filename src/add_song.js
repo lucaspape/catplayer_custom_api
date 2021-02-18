@@ -65,6 +65,10 @@ async function add_song(filename, callback){
     }
   }
 
+  if(!image_data && process.argv[3]){
+    image_data = fs.readFileSync(process.argv[3]);
+  }
+
   save_cover_image(releaseId, image_data, ()=>{
     convert_audio(filename, releaseId, songId, ()=>{
       console.log('Converted audio!');
