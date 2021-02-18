@@ -110,9 +110,35 @@ app.get(API_PREFIX + '/releases', (req,res) => {
 app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
   const mcID = req.params.mcID;
 
-  res.status(500).send('NOT IMPLEMENTED');
+  var influxDB = database(config);
 
-  //TODO IMPLEMENT
+  influxDB.query('select * from release where catalogId=~ /^' +  mcID + '/').then( (release_result)=>{
+    var result_object = {};
+
+    result_object.release = release_result;
+    result_object.tracks = [];
+
+    influxDB.query('select * from release_tracks where releaseId=~ /^' +  mcID + '/').then( (release_tracks_result)=>{
+      var i = 0;
+
+      var loop = function(){
+        if(i<release_tracks_result.length){
+          influxDB.query('select * from catalog where id=~ /^' +  release_tracks_result[i].songId + '/').then( (tracks_result)=>{
+            result_object.tracks.push(tracks_result[0]);
+
+            i++;
+            loop();
+          });
+        }else{
+          res.send(result_object);
+        }
+      }
+
+      loop();
+    });
+  }).catch((error)=>{
+    res.status(500).send(error);
+  });
 });
 
 app.post(API_PREFIX + '/related', (req, res) => {
