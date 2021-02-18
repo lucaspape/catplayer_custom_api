@@ -57,7 +57,15 @@ async function add_song(filename, callback){
 
   var bpm = 0;
 
-  save_cover_image(releaseId, metadata.common.picture[0].data, ()=>{
+  var image_data = undefined;
+
+  if(metadata.common.picture){
+    if(metadata.common.picture[0]){
+      image_data = metadata.common.picture[0].data;
+    }
+  }
+
+  save_cover_image(releaseId, image_data, ()=>{
     convert_audio(filename, releaseId, songId, ()=>{
       console.log('Converted audio!');
 
