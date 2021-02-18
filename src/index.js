@@ -300,6 +300,8 @@ app.get(API_PREFIX + '/catalog/search', (req, res) => {
 
     const terms = searchString.split(' ');
 
+    console.log('select * from catalog WHERE search =~ /(?i)' + terms[0] + '/ ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip);
+
     influxDB.query('select * from catalog WHERE search =~ /(?i)' + terms[0] + '/ ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
       add_release_objects_to_tracks(influxDB, result, (final_result)=>{
         res.send({results:final_result});
