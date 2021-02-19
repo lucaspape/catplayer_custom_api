@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const bodyParser = require('body-parser');
 const Influx = require('influx');
 const {stat, createReadStream} = require('fs');
 const {pipeline} = require('stream');
@@ -15,6 +16,11 @@ const API_PREFIX = PREFIX + '/v1';
 const API_NEXT_PREFIX = PREFIX + '/v2';
 
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 app.get(PREFIX + '/stats', (req, res) => {
   res.status(500).send('NOT IMPLEMENTED');
