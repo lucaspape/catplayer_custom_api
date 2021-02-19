@@ -481,7 +481,7 @@ function processRelated(searchArray, tracks, callback) {
         for(var k=0; k<tracks.length; k++){
             var secondSearch = tracks[k].search.replace(tracks[k].id, '');
 
-            var similarity = utils.similarity(firstSearch, secondSearch);
+            var similarity = similarity(firstSearch, secondSearch);
             const id = tracks[k].id;
 
             if (arrayWithSimiliarity[k] !== undefined) {
