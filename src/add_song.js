@@ -81,8 +81,8 @@ async function add_songs(artist_dir){
           }
         }
 
-        if(!image_data && process.argv[3]){
-          image_data = fs.readFileSync(process.argv[3]);
+        if(!image_data){
+          image_data = fs.readFileSync(artist_dir + '/' + artist_name + '/' + album_name + '/cover.jpg');
         }
 
         await save_cover_image(releaseId, image_data);
