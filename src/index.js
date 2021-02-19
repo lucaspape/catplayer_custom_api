@@ -114,9 +114,35 @@ app.get(API_PREFIX + '/catalog/release/:mcID', (req, res) => {
 });
 
 app.post(API_PREFIX + '/related', (req, res) => {
-  res.status(500).send('NOT IMPLEMENTED');
+  fixSkipAndLimit(req.query, function (skip, limit) {
+    var influxDB = database(config);
 
-  //TODO IMPLEMENT
+    const tracks = req.body.tracks;
+    const exclude = req.body.exclude;
+
+    getSearchFromIds(tracks, influxDB, function (search) {
+      var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!=' + search[0].id + ' ';
+
+      for (var i = 1; i < search.length; i++) {
+        catalogSongQuery += 'AND id != ' + search[i].id + ' ';
+      }
+
+      if (exclude !== undefined) {
+        for (var i = 0; i < exclude.length; i++) {
+          catalogSongQuery += 'AND id != ' + exclude[i].id + ' ';
+        }
+      }
+
+      influxDB.query(catalogSongQuery).then( (tracks_result)=>{
+        processRelated(search, tracks_result, (result)=>{
+          res.send({results: result});
+        });
+      });
+    }, function (err) {
+      console.log(err);
+      res.send(err);
+    })
+  });
 });
 
 app.get(API_NEXT_PREFIX + '/playlist', (req, res) => {
@@ -410,6 +436,85 @@ function processCatalogSearch(influxDB, searchString, terms, trackArray, skip, l
     trackArray = trackArray.slice(skip, skip + limit);
 
     add_release_objects_to_tracks(influxDB, trackArray, callback)
+}
+
+function processReleasesSearch(searchString, terms, releaseArray, skip, limit, callback) {
+    for (var k = 1; k < terms.length; k++) {
+        releaseArray = releaseArray.filter(release => new RegExp(terms[k], 'i').test(release.search));
+    }
+
+    for (var i = 0; i < releaseArray.length; i++) {
+        releaseArray[i].similarity = utils.similarity(releaseArray[i].search.replace(releaseArray[i].id, ''), searchString);
+    }
+
+    releaseArray.sort(function (a, b) {
+        if (a.similarity < b.similarity) return 1;
+        if (a.similarity > b.similarity) return -1;
+        return 0;
+    });
+
+    releaseArray = releaseArray.slice(skip, skip + limit);
+
+    for (var i = 0; i < releaseArray.length; i++) {
+        releaseArray[i] = utils.addMissingReleaseKeys(releaseArray[i]);
+    }
+
+    callback(releaseArray);
+}
+
+function processRelated(searchArray, tracks, callback) {
+    var arrayWithSimiliarity = [];
+
+    for (var i = 0; i < searchArray.length; i++) {
+        const firstSearch = searchArray[i].search.replace(searchArray[i].id, '');
+
+        for(var k=0; k<sqlResult.length; k++){
+            var secondSearch = sqlResult[k].search.replace(sqlResult[k].id, '');
+
+            var similarity = utils.similarity(firstSearch, secondSearch);
+            const id = sqlResult[k].id;
+
+            if (arrayWithSimiliarity[k] !== undefined) {
+                similarity += arrayWithSimiliarity[k].similarity;
+            }
+
+            arrayWithSimiliarity[k] = {
+                id: id,
+                similarity: similarity
+            };
+        }
+    }
+
+    arrayWithSimiliarity.sort(function (a, b) {
+        if (a.similarity < b.similarity) return 1;
+        if (a.similarity > b.similarity) return -1;
+        return 0;
+    });
+
+    callback(arrayWithSimiliarity);
+}
+
+getSearchFromIds(tracks, influxDB, callback){
+  var trackSearch = [];
+
+  var i = 0;
+
+  var influxCallback = function () {
+    if (i < tracks.length) {
+      const catalogSongQuery = 'SELECT id,search FROM catalog WHERE id=' + tracks[i].id;
+
+      influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((results)=>{
+        trackSearch[i] = results[0];
+        i++;
+        influxCallback();
+      });
+    } else {
+      //DONE
+      callback(trackSearch);
+    }
+  }
+
+  influxCallback();
 }
 
 
