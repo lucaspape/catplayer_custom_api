@@ -102,6 +102,7 @@ async function add_songs(artist_dir){
         {
           measurement: 'release_tracks',
           tags: {
+            id: uuidv4()
           },
           fields: {
             releaseId: catalogId,

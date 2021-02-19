@@ -75,6 +75,7 @@ module.exports = function(config){
         songId: Influx.FieldType.STRING
       },
       tags: [
+        'id'
       ]
     },
     {
