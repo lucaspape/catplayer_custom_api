@@ -7,114 +7,103 @@ const database = require('./database.js');
 
 var config = JSON.parse(fs.readFileSync('config.json'));
 
-var songs_dir = process.argv[2];
+//dir structure: artistName/albumName/songs
 
-fs.readdir(songs_dir, (err, files) => {
-  var i = 0;
+var artist_dir = process.argv[2];
 
-  var add_loop = async function(){
-    if(i<files.length){
-      add_song(songs_dir + '/' + files[i], ()=>{
-        i++;
-        add_loop();
-      });
-    }
-  }
+add_songs(artist_dir);
 
-  add_loop();
-});
-
-async function add_song(filename, callback){
-  console.log('Adding song file: ' + filename);
-
-  const metadata = await mm.parseFile(filename);
-
-  filename = '"' + filename + '"';
-
+async function add_songs(artist_dir){
   var influxDB = database(config);
 
-  var songId = uuidv4();
-  var catalogId = uuidv4();
-  var releaseId = uuidv4();
+  const artist_files = fs.readdirSync(artist_dir);
 
-  var artistsTitle = metadata.common.artist;
-  var duration = metadata.format.duration;
-  var isrc = metadata.common.isrc;
-  var title = metadata.common.title;
+  for(const artist_file of artist_files){
+    var querys = [];
 
-  var genrePrimary = '';
-  var genreSecondary = '';
+    var artist_name = artist_file;
+    var artist_id = uuidv4();
 
-  var type = 'single';
+    const album_files = fs.readdirSync(artist_dir + '/' + artist_name);
 
-  var version = '';
+    for(const album_file of album_files){
+      var album_name = album_file;
+      var catalogId = uuidv4();
+      var releaseId = uuidv4();
 
-  var tags = '';
-  var links = '';
+      var genre_primary = '';
+      var genre_secondary = '';
+      var links = '';
+      var release_date = '';
+      var release_time = '';
+      var type = 'album';
+      var version = '';
 
-  var releaseDate = '';
-  var releaseTime = '';
+      querys.push({
+        measurement: 'release',
+        tags: {
+          id: releaseId
+        },
+        fields: {
+          catalogId: catalogId,
+          artistsTitle:artist_name,
+          genrePrimary:genre_primary,
+          genreSecondary:genre_secondary,
+          links:links,
+          releaseDate:release_date,
+          releaseTime:release_time,
+          title:album_name,
+          type:type,
+          version:version
+        }
+      });
 
-  var bpm = 0;
+      const song_files = fs.readdirSync(artist_dir + '/' + artist_name + '/' + album_name);
 
-  var image_data = undefined;
+      for(const song_file of song_files){
+        var song_filename = artist_dir + '/' + artist_name + '/' + album_name + '/' + song_file;
+        var songId = uuidv4();
 
-  if(metadata.common.picture){
-    if(metadata.common.picture[0]){
-      image_data = metadata.common.picture[0].data;
-    }
-  }
+        const metadata = await mm.parseFile(song_filename);
 
-  if(!image_data && process.argv[3]){
-    image_data = fs.readFileSync(process.argv[3]);
-  }
+        var bpm = 0;
+        var duration = metadata.format.duration;
+        var isrc = metadata.common.isrc;
+        var tags = '';
+        var song_title = metadata.common.title;
+        var song_version = '';
 
-  save_cover_image(releaseId, image_data, ()=>{
-    convert_audio(filename, releaseId, songId, ()=>{
-      console.log('Converted audio!');
+        var image_data = undefined;
 
-      influxDB.writePoints([
-        {
+        if(metadata.common.picture){
+          if(metadata.common.picture[0]){
+            image_data = metadata.common.picture[0].data;
+          }
+        }
+
+        if(!image_data && process.argv[3]){
+          image_data = fs.readFileSync(process.argv[3]);
+        }
+
+        await save_cover_image(releaseId, image_data);
+        console.log('saved cover image!');
+        await convert_audio('"' + song_filename + '"', releaseId, songId);
+        console.log('converted audio!');
+
+        querys.push({
           measurement: 'catalog',
           tags: {
             id: songId
           },
-          fields: add_song_to_db('',artistsTitle,bpm,true,releaseDate,releaseTime,duration,false,genrePrimary,genreSecondary,isrc,0,releaseId,tags,title,version,false,true,true)
-        },
-        {
-          measurement: 'release',
-          tags: {
-            id: releaseId
-          },
-          fields: {
-            catalogId: catalogId,
-            artistsTitle:artistsTitle,
-            genrePrimary:genrePrimary,
-            genreSecondary:genreSecondary,
-            links:links,
-            releaseDate:releaseDate,
-            releaseTime:releaseTime,
-            title:title,
-            type:type,
-            version:version
-          }
-        },
-        {
-          measurement: 'release_tracks',
-          tags: {
-            releaseId: catalogId
-          },
-          fields: {
-            songId: songId
-          }
-        }
-      ]).then(()=>{
-        callback();
-      }).catch(error => {
-        console.log(error.stack);
-      });
-    });
-  });
+          fields: add_song_to_db('',artist_name,bpm,true,release_date,release_time,duration,false,genre_primary,genre_secondary,isrc,0,releaseId,tags,song_title,song_version,false,true,true)
+        });
+      }
+    }
+
+    await influxDB.writePoints(querys);
+  }
+
+  console.log('Done!');
 }
 
 function add_song_to_db(artistIds, artistsTitle,bpm,creatorFriendly,debutDate,debutTime,duration,explicit,genrePrimary,genreSecondary,isrc,playlistSort,releaseId,tags,title,version,inEarlyAccess,downloadable,streamable){
@@ -144,11 +133,15 @@ function add_song_to_db(artistIds, artistsTitle,bpm,creatorFriendly,debutDate,de
   }
 }
 
-function convert_audio(filename, releaseId, songid, callback){
-  create_audio_dirs(releaseId, ()=>{
-    convert_to_flac(filename, releaseId, songid, ()=>{
-      convert_to_mp3(filename, releaseId, songid, ()=>{
-        convert_to_wav(filename, releaseId, songid, callback);
+function convert_audio(filename, releaseId, songid){
+  return new Promise((resolve,reject)=>{
+    create_audio_dirs(releaseId, ()=>{
+      convert_to_flac(filename, releaseId, songid, ()=>{
+        convert_to_mp3(filename, releaseId, songid, ()=>{
+          convert_to_wav(filename, releaseId, songid, ()=>{
+            resolve();
+          });
+        });
       });
     });
   });
@@ -178,18 +171,20 @@ function convert_to_wav(filename, releaseId, songid, callback){
   });
 }
 
-function save_cover_image(releaseId, coverImage, callback){
-  if(coverImage){
-    create_cover_image_dirs(releaseId, ()=>{
-      var fs_stream = fs.createWriteStream('covers/' + releaseId + '/' + releaseId + '.jpg');
+function save_cover_image(releaseId, coverImage){
+  return new Promise((resolve, reject)=>{
+    if(coverImage){
+      create_cover_image_dirs(releaseId, ()=>{
+        var fs_stream = fs.createWriteStream('covers/' + releaseId + '/' + releaseId + '.jpg');
 
-      fs_stream.write(coverImage);
-      fs_stream.end();
-      callback();
-    });
-  }else{
-    callback();
-  }
+        fs_stream.write(coverImage);
+        fs_stream.end();
+        resolve();
+      });
+    }else{
+      resolve();
+    }
+  });
 }
 
 function create_cover_image_dirs(releaseId, callback){
