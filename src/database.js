@@ -71,10 +71,10 @@ module.exports = function(config){
     {
       measurement: 'release_tracks',
       fields: {
+        releaseId: Influx.FieldType.STRING,
         songId: Influx.FieldType.STRING
       },
       tags: [
-        'releaseId',
       ]
     },
     {

@@ -100,11 +100,11 @@ async function add_songs(artist_dir){
 
         querys.push(
         {
-          measurement: 'release_tracks',
+          measurement: 'release_tracks_' + catalogId,
           tags: {
-            releaseId: catalogId
           },
           fields: {
+            releaseId: catalogId,
             songId: songId
           }
         });
