@@ -151,10 +151,7 @@ app.post(API_PREFIX + '/related', (req, res) => {
         res.send({results: []});
       }
 
-    }, function (err) {
-      console.log(err);
-      res.send(err);
-    })
+    });
   });
 });
 
@@ -514,6 +511,7 @@ function getSearchFromIds(tracks, influxDB, callback){
 
   var influxCallback = function () {
     if (i < tracks.length) {
+      console.log('select id,search from catalog where id=~ /^' + tracks[i].id + '/');
       influxDB.query('select id,search from catalog where id=~ /^' + tracks[i].id + '/').then((results)=>{
         trackSearch[i] = results[0];
         i++;
