@@ -298,7 +298,7 @@ app.get(API_PREFIX + '/catalog/search', (req, res) => {
   fixSkipAndLimit(req.query, (skip, limit) => {
     var influxDB = database(config);
 
-    const terms = searchString.split('%20');
+    const terms = searchString.split(' ');
 
     influxDB.query('select * from catalog WHERE search =~ /(?i)' + terms[0] + '/ ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
       processCatalogSearch(influxDB, searchString, terms, result, skip, limit, (final_result)=>{
@@ -352,7 +352,6 @@ function fixSearchString(searchString) {
     searchString = searchString.replace(/[^\x20-\x7E]/g, "");
     searchString = searchString.replace('(', '%7B');
     searchString = searchString.replace(')', '%7D');
-    searchString = searchString.replace(' ', '%20');
     searchString = searchString.trim();
 
     return searchString;
