@@ -7,7 +7,7 @@ const database = require('./database.js');
 
 var config = JSON.parse(fs.readFileSync('config.json'));
 
-//dir structure: artistName/albumName/songs
+//dir structure: input_dir/artistName/albumName/songs
 
 var artist_dir = process.argv[2];
 
