@@ -97,6 +97,17 @@ async function add_songs(artist_dir){
           },
           fields: add_song_to_db('',artist_name,bpm,true,release_date,release_time,duration,false,genre_primary,genre_secondary,isrc,0,releaseId,tags,song_title,song_version,false,true,true)
         });
+
+        querys.push(
+        {
+          measurement: 'release_tracks',
+          tags: {
+            releaseId: catalogId
+          },
+          fields: {
+            songId: songId
+          }
+        });
       }
     }
 
