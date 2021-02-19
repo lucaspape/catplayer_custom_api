@@ -136,7 +136,7 @@ app.post(API_PREFIX + '/related', (req, res) => {
 
         if (exclude !== undefined) {
           for (var i = 0; i < exclude.length; i++) {
-            catalogSongQuery += 'AND id !=~ /^' + exclude[i].id + '/'';
+            catalogSongQuery += 'AND id !=~ /^' + exclude[i].id + '/';
           }
         }
 
