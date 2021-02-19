@@ -4,7 +4,9 @@ const bodyParser = require('body-parser');
 const Influx = require('influx');
 const {stat, createReadStream} = require('fs');
 const {pipeline} = require('stream');
-const path = require('path')
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 const database = require('./database.js');
 
@@ -46,16 +48,77 @@ app.get(API_NEXT_PREFIX + '/session', (req, res) => {
   //TODO IMPLEMENT
 });
 
-app.post(API_NEXT_PREFIX + '/register', (req, res) => {
-  res.status(500).send('NOT IMPLEMENTED');
+var registration_enabled = true;
 
-  //TODO IMPLEMENT
+app.post(API_NEXT_PREFIX + '/register', (req, res) => {
+  if(registration_enabled){
+    const username = req.params.email;
+    const password = req.params.password;
+
+    const password_hash = crypto.createHash('sha256').update(password).digest('base64');
+
+    var influxDB = database(config);
+
+    influxDB.query('select * from user where username=~ /^' +  username + '/').then((result)=>{
+      if(!result[0]){
+        influxDB.writePoints([
+          {
+            measurement: 'user',
+            tags: {
+              username: username,
+              id: uuidv4();
+            },
+            fields: {
+              password: password_hash
+            }
+          }
+        ]);
+
+        res.send('User created');
+      }else{
+        res.status(500).send('User already exists');
+      }
+    });
+  }else{
+    res.status(500).send('Registration is disabled');
+  }
 });
 
 app.post(API_NEXT_PREFIX + '/signin', (req, res) => {
-  res.status(500).send('NOT IMPLEMENTED');
+  const username = req.params.email;
+  const password = req.params.password;
 
-  //TODO IMPLEMENT
+  const password_hash = crypto.createHash('sha256').update(password).digest('base64');
+
+  var influxDB = database(config);
+
+  influxDB.query('select * from user where username=~ /^' +  username + '/').then((result)=>{
+    if(result[0]){
+      if(result[0].password = password_hash){
+        var session_id = uuidv4();
+
+        influxDB.writePoints([
+          {
+            measurement: 'session',
+            tags: {
+              id: uuidv4();
+            },
+            fields: {
+              userId: result.id,
+              sessionId: session_id
+            }
+          }
+        ]);
+
+        res.cookie('cid', session_id, {maxAge: 1000000});
+        res.send('OK');
+      }else{
+        res.status(500).send('Login failed');
+      }
+    }else{
+      res.status(500).send('Login failed');
+    }
+  });
 });
 
 app.get(API_PREFIX + '/catalog', (req,res) => {

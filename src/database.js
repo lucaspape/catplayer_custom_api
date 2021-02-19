@@ -52,7 +52,8 @@ module.exports = function(config){
     {
       measurement: 'session',
       fields: {
-
+        userId: Influx.FieldType.STRING,
+        sessionId: Influx.FieldType.STRING
       },
       tags: [
         'id'
