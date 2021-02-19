@@ -478,11 +478,11 @@ function processRelated(searchArray, tracks, callback) {
     for (var i = 0; i < searchArray.length; i++) {
         const firstSearch = searchArray[i].search.replace(searchArray[i].id, '');
 
-        for(var k=0; k<sqlResult.length; k++){
-            var secondSearch = sqlResult[k].search.replace(sqlResult[k].id, '');
+        for(var k=0; k<tracks.length; k++){
+            var secondSearch = tracks[k].search.replace(tracks[k].id, '');
 
             var similarity = utils.similarity(firstSearch, secondSearch);
-            const id = sqlResult[k].id;
+            const id = tracks[k].id;
 
             if (arrayWithSimiliarity[k] !== undefined) {
                 similarity += arrayWithSimiliarity[k].similarity;
