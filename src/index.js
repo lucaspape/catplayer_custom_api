@@ -301,7 +301,7 @@ app.get(API_PREFIX + '/catalog/search', (req, res) => {
     const terms = searchString.split('%20');
 
     influxDB.query('select * from catalog WHERE search =~ /(?i)' + terms[0] + '/ ORDER BY time desc LIMIT ' + limit + ' OFFSET ' + skip).then( (result)=>{
-      add_release_objects_to_tracks(influxDB, result, (final_result)=>{
+      processCatalogSearch(influxDB, searchString, terms, result, skip, limit, (final_result)=>{
         res.send({results:final_result});
       });
     }).catch((error)=>{
@@ -391,4 +391,70 @@ function add_release_objects_to_tracks(influxDB, track_array, callback){
   }
 
   loop();
+}
+
+function processCatalogSearch(influxDB, searchString, terms, trackArray, skip, limit, callback) {
+    for (var k = 1; k < terms.length; k++) {
+        trackArray = trackArray.filter(track => new RegExp(terms[k], 'i').test(track.search));
+    }
+
+    for (var i = 0; i < trackArray.length; i++) {
+        trackArray[i].similarity = similarity(trackArray[i].search.replace(trackArray[i].id, ''), searchString);
+    }
+
+    trackArray.sort(function (a, b) {
+        if (a.similarity < b.similarity) return 1;
+        if (a.similarity > b.similarity) return -1;
+        return 0;
+    });
+
+    trackArray = trackArray.slice(skip, skip + limit);
+
+    add_release_objects_to_tracks(influxDB, trackArray, callback)
+}
+
+
+function editDistance(s1, s2) {
+  s1 = s1.toLowerCase();
+  s2 = s2.toLowerCase();
+
+  var costs = new Array();
+  for (var i = 0; i <= s1.length; i++) {
+    var lastValue = i;
+    for (var j = 0; j <= s2.length; j++) {
+      if (i == 0)
+        costs[j] = j;
+      else {
+        if (j > 0) {
+          var newValue = costs[j - 1];
+          if (s1.charAt(i - 1) != s2.charAt(j - 1))
+            newValue = Math.min(Math.min(newValue, lastValue),
+              costs[j]) + 1;
+          costs[j - 1] = lastValue;
+          lastValue = newValue;
+        }
+      }
+    }
+    if (i > 0)
+      costs[s2.length] = lastValue;
+  }
+  return costs[s2.length];
+}
+
+function similarity(s1, s2) {
+  if (s1 !== undefined && s2 !== undefined) {
+    var longer = s1;
+    var shorter = s2;
+    if (s1.length < s2.length) {
+      longer = s2;
+      shorter = s1;
+    }
+    var longerLength = longer.length;
+    if (longerLength == 0) {
+      return 1.0;
+    }
+    return ((longerLength - editDistance(longer, shorter)) / parseFloat(longerLength)) * 100.0;
+  } else {
+    return 0.0;
+  }
 }
