@@ -61,54 +61,56 @@ async function add_songs(artist_dir){
       const song_files = fs.readdirSync(artist_dir + '/' + artist_name + '/' + album_name);
 
       for(const song_file of song_files){
-        var song_filename = artist_dir + '/' + artist_name + '/' + album_name + '/' + song_file;
-        var songId = uuidv4();
+        if(song_file !== 'cover.jpg'){
+          var song_filename = artist_dir + '/' + artist_name + '/' + album_name + '/' + song_file;
+          var songId = uuidv4();
 
-        const metadata = await mm.parseFile(song_filename);
+          const metadata = await mm.parseFile(song_filename);
 
-        var bpm = 0;
-        var duration = metadata.format.duration;
-        var isrc = metadata.common.isrc;
-        var tags = '';
-        var song_title = metadata.common.title;
-        var song_version = '';
+          var bpm = 0;
+          var duration = metadata.format.duration;
+          var isrc = metadata.common.isrc;
+          var tags = '';
+          var song_title = metadata.common.title;
+          var song_version = '';
 
-        var image_data = undefined;
+          var image_data = undefined;
 
-        if(metadata.common.picture){
-          if(metadata.common.picture[0]){
-            image_data = metadata.common.picture[0].data;
+          if(metadata.common.picture){
+            if(metadata.common.picture[0]){
+              image_data = metadata.common.picture[0].data;
+            }
           }
-        }
 
-        if(!image_data){
-          image_data = fs.readFileSync(artist_dir + '/' + artist_name + '/' + album_name + '/cover.jpg');
-        }
-
-        await save_cover_image(releaseId, image_data);
-        console.log('saved cover image!');
-        await convert_audio('"' + song_filename + '"', releaseId, songId);
-        console.log('converted audio!');
-
-        querys.push({
-          measurement: 'catalog',
-          tags: {
-            id: songId
-          },
-          fields: add_song_to_db('',artist_name,bpm,true,release_date,release_time,duration,false,genre_primary,genre_secondary,isrc,0,releaseId,tags,song_title,song_version,false,true,true)
-        });
-
-        querys.push(
-        {
-          measurement: 'release_tracks',
-          tags: {
-            id: uuidv4()
-          },
-          fields: {
-            releaseId: catalogId,
-            songId: songId
+          if(!image_data){
+            image_data = fs.readFileSync(artist_dir + '/' + artist_name + '/' + album_name + '/cover.jpg');
           }
-        });
+
+          await save_cover_image(releaseId, image_data);
+          console.log('saved cover image!');
+          await convert_audio('"' + song_filename + '"', releaseId, songId);
+          console.log('converted audio!');
+
+          querys.push({
+            measurement: 'catalog',
+            tags: {
+              id: songId
+            },
+            fields: add_song_to_db('',artist_name,bpm,true,release_date,release_time,duration,false,genre_primary,genre_secondary,isrc,0,releaseId,tags,song_title,song_version,false,true,true)
+          });
+
+          querys.push(
+          {
+            measurement: 'release_tracks',
+            tags: {
+              id: uuidv4()
+            },
+            fields: {
+              releaseId: catalogId,
+              songId: songId
+            }
+          });
+        }
       }
     }
 
