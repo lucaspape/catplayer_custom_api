@@ -481,16 +481,16 @@ function processRelated(searchArray, tracks, callback) {
         for(var k=0; k<tracks.length; k++){
             var secondSearch = tracks[k].search.replace(tracks[k].id, '');
 
-            var similarity = similarity(firstSearch, secondSearch);
+            var track_similarity = similarity(firstSearch, secondSearch);
             const id = tracks[k].id;
 
             if (arrayWithSimiliarity[k] !== undefined) {
-                similarity += arrayWithSimiliarity[k].similarity;
+                track_similarity += arrayWithSimiliarity[k].similarity;
             }
 
             arrayWithSimiliarity[k] = {
                 id: id,
-                similarity: similarity
+                similarity: track_similarity
             };
         }
     }
