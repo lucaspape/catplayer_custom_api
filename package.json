@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/lucaspape/catplayer_custom_api#readme",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "child_process": "^1.0.2",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
