@@ -128,7 +128,7 @@ app.post(API_PREFIX + '/related', (req, res) => {
 
     getSearchFromIds(tracks, influxDB, function (search) {
       if(search[0]){
-        var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!=~ /^' + search[0].id + '/';
+        var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!= /^' + search[0].id + '/';
 
         for (var i = 1; i < search.length; i++) {
           catalogSongQuery += 'AND id != /^' + search[i].id + '/';
