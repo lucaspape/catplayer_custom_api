@@ -395,6 +395,7 @@ function add_release_objects_to_tracks(influxDB, track_array, callback){
 
 function processCatalogSearch(influxDB, searchString, terms, trackArray, skip, limit, callback) {
     for (var k = 1; k < terms.length; k++) {
+        console.log(terms[k]);
         trackArray = trackArray.filter(track => new RegExp(terms[k], 'i').test(track.search));
     }
 
