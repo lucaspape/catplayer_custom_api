@@ -128,15 +128,15 @@ app.post(API_PREFIX + '/related', (req, res) => {
 
     getSearchFromIds(tracks, influxDB, function (search) {
       if(search[0]){
-        var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!=' + search[0].id;
+        var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!="' + search[0].id + '"';
 
         for (var i = 1; i < search.length; i++) {
-          catalogSongQuery += 'AND id !=' + search[i].id;
+          catalogSongQuery += 'AND id !="' + search[i].id + '"';
         }
 
         if (exclude !== undefined) {
           for (var i = 0; i < exclude.length; i++) {
-            catalogSongQuery += 'AND id !=' + exclude[i].id;
+            catalogSongQuery += 'AND id !="' + exclude[i].id + '"';
           }
         }
 
