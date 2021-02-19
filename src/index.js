@@ -494,7 +494,7 @@ function processRelated(searchArray, tracks, callback) {
     callback(arrayWithSimiliarity);
 }
 
-getSearchFromIds(tracks, influxDB, callback){
+function getSearchFromIds(tracks, influxDB, callback){
   var trackSearch = [];
 
   var i = 0;
