@@ -127,23 +127,28 @@ app.post(API_PREFIX + '/related', (req, res) => {
     const exclude = req.body.exclude;
 
     getSearchFromIds(tracks, influxDB, function (search) {
-      var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!=' + search[0].id + ' ';
+      if(search[0]){
+        var catalogSongQuery = 'select id,search from catalog WHERE ' + 'id!=' + search[0].id + ' ';
 
-      for (var i = 1; i < search.length; i++) {
-        catalogSongQuery += 'AND id != ' + search[i].id + ' ';
-      }
-
-      if (exclude !== undefined) {
-        for (var i = 0; i < exclude.length; i++) {
-          catalogSongQuery += 'AND id != ' + exclude[i].id + ' ';
+        for (var i = 1; i < search.length; i++) {
+          catalogSongQuery += 'AND id != ' + search[i].id + ' ';
         }
+
+        if (exclude !== undefined) {
+          for (var i = 0; i < exclude.length; i++) {
+            catalogSongQuery += 'AND id != ' + exclude[i].id + ' ';
+          }
+        }
+
+        influxDB.query(catalogSongQuery).then( (tracks_result)=>{
+          processRelated(search, tracks_result, (result)=>{
+            res.send({results: result});
+          });
+        });
+      }else{
+        res.send({results: []});
       }
 
-      influxDB.query(catalogSongQuery).then( (tracks_result)=>{
-        processRelated(search, tracks_result, (result)=>{
-          res.send({results: result});
-        });
-      });
     }, function (err) {
       console.log(err);
       res.send(err);
