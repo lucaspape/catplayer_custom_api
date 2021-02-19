@@ -507,9 +507,7 @@ function getSearchFromIds(tracks, influxDB, callback){
 
   var influxCallback = function () {
     if (i < tracks.length) {
-      const catalogSongQuery = 'SELECT id,search FROM catalog WHERE id=' + tracks[i].id;
-
-      influxDB.query('select * from release where id=~ /^' + track.releaseId + '/').then((results)=>{
+      influxDB.query('select id,search from catalog where id=~ /^' + tracks[i].id + '/').then((results)=>{
         trackSearch[i] = results[0];
         i++;
         influxCallback();
