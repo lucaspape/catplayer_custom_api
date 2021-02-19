@@ -140,6 +140,8 @@ app.post(API_PREFIX + '/related', (req, res) => {
           }
         }
 
+        console.log(catalogSongQuery);
+
         influxDB.query(catalogSongQuery).then( (tracks_result)=>{
           processRelated(search, tracks_result, (result)=>{
             res.send({results: result});
