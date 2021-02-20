@@ -66,7 +66,7 @@ app.post(API_NEXT_PREFIX + '/register', (req, res) => {
             measurement: 'user',
             tags: {
               username: username,
-              id: uuidv4();
+              id: uuidv4()
             },
             fields: {
               password: password_hash
@@ -101,7 +101,7 @@ app.post(API_NEXT_PREFIX + '/signin', (req, res) => {
           {
             measurement: 'session',
             tags: {
-              id: uuidv4();
+              id: uuidv4()
             },
             fields: {
               userId: result.id,
